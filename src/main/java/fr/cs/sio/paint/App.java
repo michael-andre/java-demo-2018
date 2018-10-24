@@ -1,8 +1,10 @@
 package fr.cs.sio.paint;
 
-import fr.cs.sio.paint.model.Circle;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import fr.cs.sio.paint.gson.ShapeAdapter;
 import fr.cs.sio.paint.model.Point;
-import fr.cs.sio.paint.model.Polygon;
 import fr.cs.sio.paint.model.Rectangle;
 import fr.cs.sio.paint.model.Shape;
 import fr.cs.sio.paint.ui.Paintable;
@@ -13,37 +15,56 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Main class of our demo program.
+ */
+// Everything is object in Java, so the entry point of this console application must be in a class.
+// There is always one class per file, and the filename must match the name of the class.
 public class App {
 
+    // The main() method is the entry point of our application.
+    // It receives an array of strings as a parameters with optional arguments specified on execution.
     public static void main(String... params) {
 
         String content;
         try {
+
+            // This method may throw IOException (see signature), which is a checked Exception.
+            // We must deal with the error case by wrapping the call in a tr-catch statement.
             content = getUrlContent("https://pastebin.com/raw/5n10aqyP");
+            System.out.println(content);
+
         } catch (IOException ex) {
+            // We get here if an IOException is thrown by the above code.
+            // Here we simply log the error and terminate the program.
             System.out.println("Error when getting content: " + ex.toString());
             return;
         }
 
-        System.out.println(content);
+        List<Shape> list;
+        try {
+            list = parseShapesFromContent(content);
+        } catch (Exception ex) {
+            System.out.println("Failed to deserialize content: " + ex.toString());
+            return;
+        }
 
-        //List<Paintable> l = createPaintablesFromContent(content);
-
-        List<Paintable> l = new ArrayList<>();
+        // Define some paintables.
+        /*List<Paintable> l = new ArrayList<>();
         l.add(new Rectangle(30, 40, 100, 200));
         List<Point> p = new ArrayList<Point>();
         p.add(new Point(50, 70));
         p.add(new Point(100, 120));
         p.add(new Point(20, 150));
-        l.add(new Polygon(p));
+        l.add(new Polygon(p));*/
 
         // Instantiate our custom panel to display the paintables.
-        PaintableCanvas canvas = new PaintableCanvas(l);
+        PaintableCanvas canvas = new PaintableCanvas(list);
         canvas.setBackground(java.awt.Color.WHITE);
 
         // UI classes are provided in the javax.swing.* package.
@@ -55,6 +76,11 @@ public class App {
         window.setVisible(true);
     }
 
+    /***
+     * Download the content of a URL and return it as a string.
+     * This version only makes use of builtin stream-manipulation classes.
+     * @throws IOException if anything goes wrong with the download process.
+     ***/
     private static String getUrlContent(String address) throws IOException {
         // This constructor may throw MalformedUrlException if the "url" parameter is not a valid URL.
         // We don't catch the error here, instead it propagates to the calling method since our signature declares it.
@@ -93,8 +119,29 @@ public class App {
         }
     }
 
-    private static List<Paintable> createPaintablesFromContent(String content) {
-        return null;
+    /***
+     * Create a list of Paintable objects from a JSON string, using the Gson library.
+     ***/
+    private static List<Shape> parseShapesFromContent(String json) {
+
+        // By default, Gson is able to create objects and assign attributes if their names match the JSON exactly.
+        //Gson gson = new Gson();
+
+        // In our case we have to customize it to help it to deserialize concrete Shape subclasses.
+        Gson gson = new GsonBuilder()
+                // Register an adapter that will be associated to the Shape.class type.
+                .registerTypeAdapter(Shape.class, new ShapeAdapter())
+                // The library uses the "builder" pattern (each method returns "this", so that we can chain calls).
+                .create();
+
+        // To use Gson we have to specify the type of the root object that we want to deserialize.
+        // Here we want a list of Shapes, but unfortunately we can't express it as "List<Shape>.class".
+        // Instead we use a the TypeToken class, which is the Gson-provided indirection for this case (out of scope!).
+        Type returnType = new TypeToken<List<Shape>>() {}.getType();
+
+        // Call the gson library with the JSON string and the wanted type.
+        return gson.fromJson(json, returnType);
+
     }
 
     public static void demos(String... params) {

@@ -2,6 +2,9 @@ package fr.cs.sio.paint.model;
 
 import java.util.Objects;
 
+/**
+ * A simple point class to hold x and y values.
+ */
 public class Point {
 
     private int x, y;
@@ -29,7 +32,7 @@ public class Point {
 
     @Override
     public String toString() {
-        return "{ x: " + x + ", y: " + " }";
+        return "{ x: " + x + ", y: " + y + " }";
     }
 
     @Override

@@ -58,6 +58,7 @@ public class Rectangle extends Shape {
 
     @Override
     public void paint(Graphics g) {
+        // Luckily Graphics has a drawRect() method whose parameters match our fields.
         g.drawRect(getX(), getY(), getWidth(), getHeight());
     }
 }

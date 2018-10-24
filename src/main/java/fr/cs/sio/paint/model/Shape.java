@@ -17,13 +17,14 @@ public abstract class Shape implements Paintable {
 
     // A constructor for Shape that will initialize the origin fields with the provided values.
     // Since we have at least one constructor explicitly defined in Shape, the default implicit public no-arg one is not available.
-    public Shape(int x, int y) {
+    public Shape(Point origin) {
         // When a local variable has the same name as an attribute, when use this.* to disambiguate.
-        this.origin = new Point(x, y);
+        this.origin = origin;
     }
 
-    public Shape(Point origin) {
-        this.origin = origin;
+    public Shape(int x, int y) {
+        // A convenience constructor that forwards to the other.
+        this(new Point(x, y));
     }
 
     /**
