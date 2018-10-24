@@ -32,7 +32,7 @@ public class App {
 
         System.out.println(content);
 
-        //List<Paintable> l = getShapesFromContent(content);
+        //List<Paintable> l = createPaintablesFromContent(content);
 
         List<Paintable> l = new ArrayList<>();
         l.add(new Rectangle(30, 40, 100, 200));
@@ -93,7 +93,7 @@ public class App {
         }
     }
 
-    private static List<Paintable> getShapesFromContent(String content) {
+    private static List<Paintable> createPaintablesFromContent(String content) {
         return null;
     }
 
